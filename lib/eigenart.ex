@@ -1,0 +1,2 @@
+defmodule Eigenart do
+end
