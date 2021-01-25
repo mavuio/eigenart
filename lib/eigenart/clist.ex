@@ -187,6 +187,13 @@ defmodule Eigenart.Clist do
     put_in(clist, access_list, data)
   end
 
+  def replace(clist, path, data)
+      when is_list(data) and is_binary(path) and is_list(clist) do
+    access_list = get_access_list_for_path(path)
+
+    put_in(clist, access_list, data)
+  end
+
   def flatten([head | tail]), do: flatten(head) ++ flatten(tail)
   def flatten([]), do: []
   def flatten(element), do: [element]
