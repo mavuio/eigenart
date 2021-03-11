@@ -31,4 +31,11 @@ defmodule Eigenart.Ce do
       {to_string(key), val}
     end
   end
+
+  def renew_uid(%{"uid" => _} = ce) when is_map(ce) do
+    ce
+    |> put_in(["uid"], create_uid())
+  end
+
+  def renew_uid(ce), do: ce
 end

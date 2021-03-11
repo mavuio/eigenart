@@ -198,4 +198,68 @@ defmodule Eigenart.Clist do
   def flatten([head | tail]), do: flatten(head) ++ flatten(tail)
   def flatten([]), do: []
   def flatten(element), do: [element]
+
+  def copy(clist, uids, clipboard)
+      when is_list(clist) and is_list(uids) do
+    elements_to_store =
+      clist
+      |> Enum.filter(fn a -> Enum.member?(uids, a["uid"]) end)
+      |> IO.inspect(label: "mwuits-debug 2021-03-11_12:53 TOSTORE")
+
+    clipboard.(:put, elements_to_store)
+
+    clist
+  end
+
+  def copy(clist, path, uids, clipboard)
+      when is_binary(path) and is_list(clist) and is_list(uids) do
+    path
+    |> get_access_list_for_path()
+    |> case do
+      [] ->
+        copy(clist, uids, clipboard)
+
+      path ->
+        update_in(clist, path, fn items ->
+          copy(items, uids, clipboard)
+        end)
+    end
+  end
+
+  def cut(clist, path, uids, clipboard)
+      when is_binary(path) and is_list(clist) and is_list(uids) do
+    copy(clist, path, uids, clipboard)
+
+    clist
+    |> Enum.filter(fn a -> not Enum.member?(uids, a["uid"]) end)
+  end
+
+  def paste(clist, clipboard)
+      when is_list(clist) do
+    clipboard.(:get, [])
+    |> case do
+      [_ | _] = new_elements -> clist ++ renew_uids(new_elements)
+      _ -> clist
+    end
+  end
+
+  def paste(clist, path, clipboard)
+      when is_binary(path) and is_list(clist) do
+    path
+    |> get_access_list_for_path()
+    |> case do
+      [] ->
+        paste(clist, clipboard)
+
+      path ->
+        update_in(clist, path, fn items ->
+          paste(items, clipboard)
+        end)
+    end
+  end
+
+  def renew_uids(clist) when is_list(clist) do
+    clist
+    |> Enum.map(&Ce.renew_uid/1)
+  end
 end
