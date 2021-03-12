@@ -67,7 +67,10 @@ defmodule Eigenart.CeEditBase do
         {:ok,
          socket
          |> Phoenix.LiveView.assign(assigns)
-         |> Phoenix.LiveView.assign(changeset: changeset_for_this_step(celement, context))}
+         |> Phoenix.LiveView.assign(
+           changeset: changeset_for_this_step(celement, context),
+           next_action: :keep_editing
+         )}
       end
 
       def super_handle_event("validate", %{"step_data" => incoming_data} = msg, socket) do
@@ -78,6 +81,12 @@ defmodule Eigenart.CeEditBase do
           |> Map.put(:action, :insert)
 
         {:noreply, Phoenix.LiveView.assign(socket, changeset: changeset)}
+      end
+
+      def super_handle_event("close_on_save", msg, socket) do
+        msg |> log("editor close_on_save event", :debug)
+
+        {:noreply, socket |> Phoenix.LiveView.assign(next_action: :close)}
       end
 
       def super_handle_event("save", %{"step_data" => incoming_data} = msg, socket) do
@@ -130,9 +139,10 @@ defmodule Eigenart.CeEditBase do
         |> Map.merge(Eigenart.Ce.stringify_keys(changes))
       end
 
-      def send_updated_celement_to_parent(celement, %{uid: uid, path: path} = _assigns)
+      def send_updated_celement_to_parent(celement, %{uid: uid, path: path} = assigns)
           when is_map(celement) do
-        send(self(), {:update_ce, %{uid: uid, path: path, data: celement}, :close})
+        next_action = assigns[:next_action] || :close
+        send(self(), {:update_ce, %{uid: uid, path: path, data: celement}, next_action})
       end
 
       # attachment handling:
