@@ -278,16 +278,20 @@ defmodule Eigenart.CeEditBase do
   defmacro __before_compile__(_) do
     quote do
       @impl Phoenix.LiveComponent
-      def handle_event(event, msg, socket),
-        do:
-          super_handle_event(event, msg, socket)
-          |> IO.inspect(label: "mwuits-debug 2021-03-05_15:56 DEFAULT EVENT")
+      def handle_event(event, msg, socket) do
+        {event, msg, socket.assigns |> Map.keys()}
+        |> IO.inspect(label: "mwuits-debug 2021-03-05_15:56 DEFAULT EVENT")
+
+        super_handle_event(event, msg, socket)
+      end
 
       @impl Phoenix.LiveComponent
-      def update(assigns, socket),
-        do:
-          super_update(assigns, socket)
-          |> IO.inspect(label: "mwuits-debug 2021-03-05_15:56 DEFAULT UDPATE")
+      def update(assigns, socket) do
+        {assigns |> Map.keys()}
+        |> IO.inspect(label: "mwuits-debug 2021-03-05_15:56 DEFAULT UPDATE")
+
+        super_update(assigns, socket)
+      end
 
       def save_step_data(incoming_data, context),
         do: super_save_step_data(incoming_data, context)
