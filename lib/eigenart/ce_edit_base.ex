@@ -279,17 +279,11 @@ defmodule Eigenart.CeEditBase do
     quote do
       @impl Phoenix.LiveComponent
       def handle_event(event, msg, socket) do
-        {event, msg, socket.assigns |> Map.keys()}
-        |> IO.inspect(label: "mwuits-debug 2021-03-05_15:56 DEFAULT EVENT")
-
         super_handle_event(event, msg, socket)
       end
 
       @impl Phoenix.LiveComponent
       def update(assigns, socket) do
-        {assigns |> Map.keys()}
-        |> IO.inspect(label: "mwuits-debug 2021-03-05_15:56 DEFAULT UPDATE")
-
         super_update(assigns, socket)
       end
 
