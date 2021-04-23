@@ -245,7 +245,7 @@ defmodule Eigenart.Clist do
     new_items
     |> case do
       [_ | _] = new_elements ->
-        add_elements_to_clist(clist, renew_uids(new_elements), uid, position)
+        add_elements_to_clist(clist, new_elements, uid, position)
 
       _ ->
         clist
