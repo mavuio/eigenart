@@ -240,50 +240,44 @@ defmodule Eigenart.Clist do
     |> Enum.filter(fn a -> not Enum.member?(uids, a["uid"]) end)
   end
 
-  def paste(clist, uid, position, clipboard)
-      when is_list(clist) do
-    clipboard.(:get, [])
+  def add(clist, uid, position, new_items)
+      when is_list(clist) and is_list(new_items) do
+    new_items
     |> case do
       [_ | _] = new_elements ->
-        paste_elements_to_clist(clist, renew_uids(new_elements), uid, position)
+        add_elements_to_clist(clist, renew_uids(new_elements), uid, position)
 
       _ ->
         clist
     end
   end
 
-  def paste_elements_to_clist(clist, elements, uid, "before") when is_binary(uid) do
-    clist
-    |> Enum.map(fn ce ->
-      if(ce["uid"] == uid) do
-        elements ++ [ce]
-      else
-        [ce]
-      end
-    end)
-    |> Enum.concat()
+  def add(clist, path, uid, position, new_items)
+      when is_list(new_items) and is_binary(path) and is_list(clist) do
+    path
+    |> get_access_list_for_path()
+    |> case do
+      [] ->
+        add(clist, uid, position, new_items)
+
+      path ->
+        update_in(clist, path, fn items ->
+          add(items, uid, position, new_items)
+        end)
+    end
   end
 
-  def paste_elements_to_clist(clist, elements, uid, "after") when is_binary(uid) do
-    clist
-    |> Enum.map(fn ce ->
-      if(ce["uid"] == uid) do
-        [ce] ++ elements
-      else
-        [ce]
-      end
-    end)
-    |> Enum.concat()
+  def paste(clist, uid, position, clipboard)
+      when is_list(clist) do
+    clipboard.(:get, [])
+    |> case do
+      [_ | _] = new_elements ->
+        add_elements_to_clist(clist, renew_uids(new_elements), uid, position)
+
+      _ ->
+        clist
+    end
   end
-
-  def paste_elements_to_clist(clist, elements, uid, _) when is_binary(uid),
-    do: paste_elements_to_clist(clist, elements, uid, "after")
-
-  def paste_elements_to_clist(clist, elements, _, "start"), do: elements ++ clist
-  def paste_elements_to_clist(clist, elements, _, "end"), do: clist ++ elements
-
-  def paste_elements_to_clist(clist, elements, _, _),
-    do: paste_elements_to_clist(clist, elements, nil, "end")
 
   def paste(clist, path, uid, position, clipboard)
       when is_binary(path) and is_list(clist) do
@@ -299,6 +293,45 @@ defmodule Eigenart.Clist do
         end)
     end
   end
+
+  def add_elements_to_clist(clist, elements, uid, "before")
+      when is_binary(uid) and is_list(elements) and is_list(clist) do
+    clist
+    |> Enum.map(fn ce ->
+      if(ce["uid"] == uid) do
+        elements ++ [ce]
+      else
+        [ce]
+      end
+    end)
+    |> Enum.concat()
+  end
+
+  def add_elements_to_clist(clist, elements, uid, "after")
+      when is_binary(uid) and is_list(elements) and is_list(clist) do
+    clist
+    |> Enum.map(fn ce ->
+      if(ce["uid"] == uid) do
+        [ce] ++ elements
+      else
+        [ce]
+      end
+    end)
+    |> Enum.concat()
+  end
+
+  def add_elements_to_clist(clist, elements, uid, _) when is_binary(uid),
+    do: add_elements_to_clist(clist, elements, uid, "after")
+
+  def add_elements_to_clist(clist, elements, _, "start")
+      when is_list(elements) and is_list(clist),
+      do: elements ++ clist
+
+  def add_elements_to_clist(clist, elements, _, "end") when is_list(elements) and is_list(clist),
+    do: clist ++ elements
+
+  def add_elements_to_clist(clist, elements, _, _),
+    do: add_elements_to_clist(clist, elements, nil, "end")
 
   def renew_uids(clist) when is_list(clist) do
     clist

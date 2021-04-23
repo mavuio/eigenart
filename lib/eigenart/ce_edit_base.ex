@@ -203,12 +203,14 @@ defmodule Eigenart.CeEditBase do
         "#{socket.assigns.uid}-#{field}.#{attachment_ext(entry)}"
       end
 
+      # example implementations:
+
       # def handle_event("validate" = event, msg, socket) do
       #   socket =
       #     get_upload_fields(socket)
       #     |> Enum.reduce(socket, &remove_other_uploads/2)
+      #
       #   super_handle_event(event, msg, socket)
-      #   # {:noreply, Phoenix.LiveView.cancel_upload(socket, :photo, ref)}
       # end
 
       # def handle_event("remove_attachment", %{"field" => field}, socket)
