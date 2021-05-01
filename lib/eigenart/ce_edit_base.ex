@@ -104,6 +104,13 @@ defmodule Eigenart.CeEditBase do
         {:noreply, socket}
       end
 
+      def super_save_step_data(%{"__next_action" => next_action} = incoming_data, socket),
+        do:
+          super_save_step_data(
+            Map.drop(incoming_data, ["__next_action"]),
+            Phoenix.LiveView.assign(socket, next_action: String.to_existing_atom(next_action))
+          )
+
       def super_save_step_data(incoming_data, socket) do
         # {incoming_data, socket.assigns}
         # |> IO.inspect(label: "mwuits-debug 2020-12-18_12:07 super_save_step_data")
