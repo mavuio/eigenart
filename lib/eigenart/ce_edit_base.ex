@@ -196,14 +196,11 @@ defmodule Eigenart.CeEditBase do
 
       def get_attachment_storage_path(socket, field, entry)
           when is_atom(field) and is_map(entry) do
-        Path.join(
+        Path.join([
           "priv/static",
-          [
-            get_attachment_basepath(socket, field, entry),
-            "/",
-            get_attachment_filename(socket, field, entry)
-          ]
-        )
+          get_attachment_basepath(socket, field, entry),
+          get_attachment_filename(socket, field, entry)
+        ])
       end
 
       def get_attachment_filename(socket, field, entry) when is_atom(field) and is_map(entry) do
